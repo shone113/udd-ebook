@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -17,20 +19,22 @@ import java.util.UUID;
 @Table(name = "forensic_report")
 public class ForensicReport {
     @Id
-    @GeneratedValue
-    @Column(name = "id", nullable = false, updatable = false)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     @Column(name = "file_name", nullable = false)
     private String fileName;
 
-    @Column(name = "minio_object_key", nullable = false, unique = true)
-    private String minioObjectKey;
+    @Column(name = "mime_type")
+    private String mimeType;
 
-    @Column(name = "uploaded_by", nullable = false)
+    @Column(name = "server_filename", nullable = false)
+    private String serverFilename;
+
+    @Column(name = "uploaded_by")
     private UUID uploadedBy;
 
-    @Column(name = "upload_date", nullable = false)
+    @Column(name = "upload_date")
     private LocalDateTime uploadDate;
 
 }

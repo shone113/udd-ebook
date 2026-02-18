@@ -1,5 +1,7 @@
 package com.example.ddmdemo.dto;
 
+import com.example.ddmdemo.indexmodel.ForensicReportIndex;
+import com.example.ddmdemo.model.ForensicReport;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,4 +31,14 @@ public class ForensicReportIndexDTO {
     private String address;
 
     private MultipartFile forensicReport;
+
+    public ForensicReportIndexDTO(ForensicReportIndex forensicReportIndex) {
+        this.analystName = forensicReportIndex.getAnalystName();
+        this.analystSurname = forensicReportIndex.getAnalystSurname();
+        this.organizationName = forensicReportIndex.getOrganizationName();
+        this.malwareName = forensicReportIndex.getMalwareName();
+        this.malwareDescription = forensicReportIndex.getMalwareDescription();
+        this.threatClassification = forensicReportIndex.getThreatClassification();
+        this.sampleHash = forensicReportIndex.getSampleHash();
+    }
 }

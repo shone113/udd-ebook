@@ -22,9 +22,6 @@ public class Address {
     @Column(name = "city", nullable = false)
     private String city;
 
-    @Column(name = "postcode", nullable = false)
-    private String postcode;
-
     @Column(name = "country", nullable = false)
     private String country;
 

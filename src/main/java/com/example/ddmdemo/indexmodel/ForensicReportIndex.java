@@ -15,7 +15,7 @@ import org.springframework.data.elasticsearch.annotations.GeoPointField;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(indexName = "forensicReport")
+@Document(indexName = "forensic_report_index")
 public class ForensicReportIndex {
 
     @Id
@@ -23,6 +23,9 @@ public class ForensicReportIndex {
 
     @Field(type = FieldType.Text, store = true, name = "fileName")
     private String fileName;
+
+    @Field(type = FieldType.Text, store = true, name = "server_filename", index = false)
+    private String serverFilename;
 
     @Field(type = FieldType.Text, store = true, name = "analystName")
     private String analystName;
