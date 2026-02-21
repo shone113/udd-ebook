@@ -2,11 +2,13 @@ package com.example.ddmdemo.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "addresses")
 public class Address {
     @Id
@@ -22,7 +24,7 @@ public class Address {
     @Column(name = "city", nullable = false)
     private String city;
 
-    @Column(name = "country", nullable = false)
+    @Column(name = "country")
     private String country;
 
     @Column(name = "lat")
@@ -30,4 +32,10 @@ public class Address {
 
     @Column(name = "lon")
     private Double lon;
+
+    public Address(String road, String houseNumber, String city) {
+        this.road = road;
+        this.houseNumber = houseNumber;
+        this.city = city;
+    }
 }

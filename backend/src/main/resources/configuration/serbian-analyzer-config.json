@@ -1,0 +1,25 @@
+{
+  "analysis": {
+    "filter": {
+      "serbian_stop": {
+        "type": "stop",
+        "stopwords": ["i", "a", "ili", "ali", "pa", "te", "da", "u", "na", "o", "po", "sa", "se"]
+      },
+      "serbian_stemmer": {
+        "type": "stemmer",
+        "language": "serbian"
+      }
+    },
+    "analyzer": {
+      "serbian_analyzer": {
+        "type": "custom",
+        "tokenizer": "icu_tokenizer",
+        "filter": [
+          "lowercase",
+          "serbian_stop",
+          "serbian_stemmer"
+        ]
+      }
+    }
+  }
+}

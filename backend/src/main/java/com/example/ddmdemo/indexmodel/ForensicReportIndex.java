@@ -1,21 +1,21 @@
 package com.example.ddmdemo.indexmodel;
 
+import org.springframework.data.elasticsearch.annotations.*;
+import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.data.annotation.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
-import org.springframework.data.elasticsearch.annotations.GeoPointField;
+import org.springframework.data.elasticsearch.annotations.Similarity;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(indexName = "forensic_report_index")
+@Setting(settingPath = "configuration/serbian-analyzer-config.json")
 public class ForensicReportIndex {
 
     @Id
@@ -53,9 +53,11 @@ public class ForensicReportIndex {
 
     @GeoPointField
     @Field(store = true, name = "location")
-    private GeoPointField location;
+    private GeoPoint location;
 
-    @Field(type = FieldType.Dense_Vector, dims = 384, similarity = "cosine")
+    @Field(type = FieldType.Dense_Vector, dims = 384)
     private float[] vectorizedContent;
 
+    @Field(type = FieldType.Text, analyzer = "serbian_analyzer")
+    private String content;
 }

@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DummyIndexRepository
     extends ElasticsearchRepository<DummyIndex, String> {
+    DummyIndex save(DummyIndex entity);
 }

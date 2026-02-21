@@ -5,17 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
-import org.springframework.data.elasticsearch.annotations.Setting;
+import org.springframework.data.elasticsearch.annotations.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(indexName = "dummy_index")
-@Setting(settingPath = "/configuration/serbian-analyzer-config.json")
+@Setting(settingPath = "configuration/serbian-analyzer-config.json")
 public class DummyIndex {
 
     @Id
@@ -36,6 +33,6 @@ public class DummyIndex {
     @Field(type = FieldType.Integer, store = true, name = "database_id")
     private Integer databaseId;
 
-    @Field(type = FieldType.Dense_Vector, dims = 384, similarity = "cosine")
+    @Field(type = FieldType.Dense_Vector, dims = 384)
     private float[] vectorizedContent;
 }

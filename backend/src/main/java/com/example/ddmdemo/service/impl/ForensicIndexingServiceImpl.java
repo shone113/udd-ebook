@@ -1,6 +1,7 @@
 package com.example.ddmdemo.service.impl;
 
 import ai.djl.translate.TranslateException;
+import com.example.ddmdemo.dto.AddressDTO;
 import com.example.ddmdemo.dto.ForensicReportIndexDTO;
 import com.example.ddmdemo.exceptionhandling.exception.LoadingException;
 import com.example.ddmdemo.exceptionhandling.exception.StorageException;
@@ -8,10 +9,12 @@ import com.example.ddmdemo.indexmodel.DummyIndex;
 import com.example.ddmdemo.indexmodel.ForensicReportIndex;
 import com.example.ddmdemo.indexrepository.DummyIndexRepository;
 import com.example.ddmdemo.indexrepository.ForensicReportIndexRepository;
+import com.example.ddmdemo.model.Address;
 import com.example.ddmdemo.model.DummyTable;
 import com.example.ddmdemo.model.ForensicReport;
 import com.example.ddmdemo.respository.DummyRepository;
 import com.example.ddmdemo.respository.ForensicReportRepository;
+import com.example.ddmdemo.service.interfaces.AddressService;
 import com.example.ddmdemo.service.interfaces.FileService;
 import com.example.ddmdemo.service.interfaces.ForensicIndexingService;
 import com.example.ddmdemo.util.VectorizationUtil;
@@ -22,6 +25,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.tika.Tika;
 import org.apache.tika.language.detect.LanguageDetector;
+import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,10 +50,15 @@ public class ForensicIndexingServiceImpl implements ForensicIndexingService {
 
     private final LanguageDetector languageDetector;
 
+    private final AddressService addressService;
+
     // Za Organizaciju (sve posle reči Organizacija)
     private static final Pattern ORG_PATTERN = Pattern.compile("Organizacija\\s+(.*)");
 
-    private static final Pattern ADDRESS_LINE_PATTERN = Pattern.compile("([^,]+),\\s*(\\d+),\\s*([^\\d\\n\\r]+)");
+    private static final Pattern ADDRESS_LINE_PATTERN = Pattern.compile(
+            "(?<=Organizacija\\s+[^\\n]+\\s+)?([A-Za-zČčĆćŠšĐđŽž\\s\\.,'-]+?)\\s*,\\s*(\\d+[A-Za-z]?)\\s*,\\s*([A-Za-zČčĆćŠšĐđŽž\\s-]+)(?:\\.|\\s|$)",
+            Pattern.CASE_INSENSITIVE
+    );
 
     // Za Klasifikaciju (tekst između "Klasifikacija:" i zareza)
     private static final Pattern CLASS_PATTERN = Pattern.compile("Klasifikacija:\\s*([^,]+)");
@@ -60,7 +69,10 @@ public class ForensicIndexingServiceImpl implements ForensicIndexingService {
     // Za Malware naziv (reč pre tačke u rečenici o artefaktu)
     private static final Pattern MALWARE_NAME_PATTERN = Pattern.compile("ukazuje na\\s+([^.]+)\\.");
 
-    private static final Pattern DESCRIPTION_PATTERN = Pattern.compile("(?s)Opis ponašanja malvera/pretnje:\\s*(.*?)(?=\\s+[A-Z][a-z]+)");
+    private static final Pattern DESCRIPTION_PATTERN = Pattern.compile(
+            "(?s)Opis ponašanja malvera/pretnje:\\s*(.*?)(?=\\s*\\n\\s*\\n\\s*\\n)",
+            Pattern.CASE_INSENSITIVE
+    );
 
     @Override
     @Transactional
@@ -72,13 +84,18 @@ public class ForensicIndexingServiceImpl implements ForensicIndexingService {
         newIndex.setFileName(title);
         newEntity.setFileName(title);
 
-        var documentContent = extractDocumentContent(documentFile);
+//        var documentContent = extractDocumentContent(documentFile);
+        var documentContent = extractDocumentContentWithTika(documentFile);
         System.out.println("SADRZAJ: " + documentContent);
+        newIndex.setContent(documentContent);
         parseText(documentContent, newIndex, newEntity);
+        parseAddress(documentContent, newIndex);
 
         var serverFilename = fileService.store(documentFile, UUID.randomUUID().toString());
         newIndex.setServerFilename(serverFilename);
         newEntity.setServerFilename(serverFilename);
+
+
 
         newEntity.setMimeType(detectMimeType(documentFile));
         var savedEntity = forensicReportRepository.save(newEntity);
@@ -121,36 +138,86 @@ public class ForensicIndexingServiceImpl implements ForensicIndexingService {
     }
 
     private void parseAddress(String text, ForensicReportIndex index) {
-        // Čistimo tekst od lošeg encoding-a (eneva -> Ženeva)
-        String cleanText = text.replace("", "Ž");
+        String cleanText = text;
 
-        Matcher m = ADDRESS_LINE_PATTERN.matcher(cleanText);
-        if (m.find()) {
-            String street = m.group(1).trim();      // Rue des
-            String houseNumber = m.group(2).trim(); // 51
-            String city = m.group(3).trim();        // Ženeva
+        System.out.println("--- DEBUG PARSIRANJE ADRESE ---");
+        System.out.println("CISCENI TEKST: " + cleanText);
 
-            // Ovde sada možeš da pozoveš tvoj AddressService
-            // Ili da spakuješ u DTO za OpenCage
-            System.out.println("Ekstraktovana adresa: " + street + " " + houseNumber + ", " + city);
+        Matcher orgMatcher = ORG_PATTERN.matcher(cleanText);
+        String textForAddress = cleanText;
+        if (orgMatcher.find()) {
+            // Uzmi sve posle organizacije
+            textForAddress = cleanText.substring(orgMatcher.end()).trim();
+            System.out.println("TEKST ZA ADRESU: " + textForAddress);
+        }
 
-            // Ako u ForensicReportIndex imaš polje za adresu, možeš ga setovati
-            // index.setAddress(street + " " + houseNumber + ", " + city);
+        // Sada traži adresu u ostatku teksta
+        Matcher m2 = ADDRESS_LINE_PATTERN.matcher(textForAddress);
+        if (m2.find()) {
+            // Ispiši sve grupe da vidimo šta imamo
+            System.out.println("GROUP 0: '" + m2.group(0) + "'"); // cela adresa
+            System.out.println("GROUP 1: '" + m2.group(1) + "'"); // ulica
+            System.out.println("GROUP 2: '" + m2.group(2) + "'"); // broj
+            System.out.println("GROUP 3: '" + m2.group(3) + "'"); // grad
+
+            processAddress(m2.group(1), m2.group(2), m2.group(3), index);
+            return;
+        }
+
+        // Ako ništa ne radi, ispiši deo teksta za ručnu proveru
+        System.out.println("ERROR: Address regex nije našao poklapanje!");
+        System.out.println("PRVIH 500 KARAKTERA: " + cleanText.substring(0, Math.min(500, cleanText.length())));
+        System.out.println("-------------------------------");
+    }
+
+    private void processAddress(String street, String houseNumber, String city, ForensicReportIndex index) {
+        street = street.trim();
+        houseNumber = houseNumber.trim();
+        city = city.trim();
+
+        System.out.println("PRONAĐENO: " + street + " " + houseNumber + " " + city);
+
+//        AddressDTO testAddress = new AddressDTO("Mise Dimitrijevica", "25", "Novi Sad");
+        Address address = addressService.createAddress(new AddressDTO(street, houseNumber, city));
+
+
+        if (address != null && address.getLat() != null) {
+            System.out.println("LOKACIJA DOBIJENA: " + address.getLat() + "," + address.getLon());
+            index.setLocation(new GeoPoint(address.getLat(), address.getLon()));
+        } else {
+            System.out.println("WARNING: Address service nije vratio koordinate!");
         }
     }
 
-    private String extractDocumentContent(MultipartFile multipartPdfFile) {
-        String documentContent;
-        try (var pdfFile = multipartPdfFile.getInputStream()) {
-            var pdDocument = PDDocument.load(pdfFile);
-            var textStripper = new PDFTextStripper();
-            documentContent = textStripper.getText(pdDocument);
-            pdDocument.close();
-        } catch (IOException e) {
-            throw new LoadingException("Error while trying to load PDF file content.");
-        }
+    private String extractDocumentContentWithTika(MultipartFile multipartPdfFile) {
+        try {
+            // Naprednija Tika konfiguracija
+            Tika tika = new Tika();
 
-        return documentContent;
+            // Detektuj encoding automatski
+            String content = tika.parseToString(multipartPdfFile.getInputStream());
+
+            // Ako Tika ne radi, probaj PDFBox sa UTF-8
+            if (content.contains("�")) {
+                content = extractWithPDFBoxAndFix(multipartPdfFile);
+            }
+
+            return content;
+
+        } catch (Exception e) {
+            throw new LoadingException("Error: " + e.getMessage());
+        }
+    }
+
+    private String extractWithPDFBoxAndFix(MultipartFile file) throws IOException {
+        try (PDDocument document = PDDocument.load(file.getInputStream())) {
+            PDFTextStripper stripper = new PDFTextStripper();
+            stripper.setLineSeparator("\n");
+            String text = stripper.getText(document);
+
+            // Jedino što RADIŠ je konverzija iz ISO-8859-1 u UTF-8
+            return new String(text.getBytes("ISO-8859-1"), "UTF-8");
+        }
     }
 
     private String detectMimeType(MultipartFile file) {
