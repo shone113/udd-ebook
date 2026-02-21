@@ -2,6 +2,7 @@ package com.example.ddmdemo.service.impl;
 
 import com.example.ddmdemo.service.interfaces.EmbeddingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -19,7 +20,8 @@ public class EmbeddingServiceImpl implements EmbeddingService {
     private final String API_URL = "https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2/pipeline/feature-extraction";
 
     // Tvoj token (registruj se na Hugging Face i uzmi besplatan Write token)
-    private final String AUTH_TOKEN = "Bearer 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";
+    @Value("${hf.api.token}")
+    private String authToken;
 
     public float[] getVector(String text) {
         if (text == null || text.isBlank()) return createSafeFallbackVector();
@@ -32,7 +34,7 @@ public class EmbeddingServiceImpl implements EmbeddingService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-            headers.set("Authorization", AUTH_TOKEN);
+            headers.set("Authorization", authToken);
 
             // Najjednostavniji mogući body
             Map<String, Object> body = Map.of("inputs", cleanText);
