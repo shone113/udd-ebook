@@ -39,7 +39,11 @@ public class ForensicReportIndex {
     @Field(type = FieldType.Text, store = true, name = "malwareName")
     private String malwareName;
 
-    @Field(type = FieldType.Text, store = true, name = "malwareDescription")
+    @Field(type = FieldType.Text,
+            store = true,
+            name = "malwareDescription",
+            analyzer = "serbian_analyzer",
+            searchAnalyzer = "serbian_analyzer")
     private String malwareDescription;
 
     @Field(type = FieldType.Keyword, store = true, name = "threatClassification")
@@ -55,9 +59,12 @@ public class ForensicReportIndex {
     @Field(store = true, name = "location")
     private GeoPoint location;
 
-    @Field(type = FieldType.Dense_Vector, dims = 384)
+    @Field(type = FieldType.Dense_Vector, dims = 384, index = true, similarity = "l2_norm")
     private float[] vectorizedContent;
 
-    @Field(type = FieldType.Text, analyzer = "serbian_analyzer")
+    @Field(type = FieldType.Text,
+            name = "content",
+            analyzer = "serbian_analyzer",
+            searchAnalyzer = "serbian_analyzer")
     private String content;
 }

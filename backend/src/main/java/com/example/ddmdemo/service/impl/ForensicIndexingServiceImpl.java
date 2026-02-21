@@ -15,6 +15,7 @@ import com.example.ddmdemo.model.ForensicReport;
 import com.example.ddmdemo.respository.DummyRepository;
 import com.example.ddmdemo.respository.ForensicReportRepository;
 import com.example.ddmdemo.service.interfaces.AddressService;
+import com.example.ddmdemo.service.interfaces.EmbeddingService;
 import com.example.ddmdemo.service.interfaces.FileService;
 import com.example.ddmdemo.service.interfaces.ForensicIndexingService;
 import com.example.ddmdemo.util.VectorizationUtil;
@@ -51,6 +52,8 @@ public class ForensicIndexingServiceImpl implements ForensicIndexingService {
     private final LanguageDetector languageDetector;
 
     private final AddressService addressService;
+
+    private final EmbeddingService embeddingService;
 
     // Za Organizaciju (sve posle reči Organizacija)
     private static final Pattern ORG_PATTERN = Pattern.compile("Organizacija\\s+(.*)");
@@ -101,10 +104,12 @@ public class ForensicIndexingServiceImpl implements ForensicIndexingService {
         var savedEntity = forensicReportRepository.save(newEntity);
 
         try {
-            newIndex.setVectorizedContent(VectorizationUtil.getEmbedding(title));
-        } catch (TranslateException e) {
-            log.error("Could not calculate vector representation for document with ID: {}",
-                    savedEntity.getId());
+            float[] vector = embeddingService.getVector(documentContent);
+            newIndex.setVectorizedContent(vector);
+        } catch (Exception e) {
+            log.error("Greška pri vektorizaciji sadržaja za dokument: {}", title);
+            // Opciono: postavi prazan niz ako ne uspe
+            newIndex.setVectorizedContent(createSafeFallbackVector());
         }
         newIndex.setDatabaseId(savedEntity.getId());
         forensicReportIndexRepository.save(newIndex);
@@ -239,5 +244,12 @@ public class ForensicIndexingServiceImpl implements ForensicIndexingService {
         }
 
         return trueMimeType;
+    }
+
+    private float[] createSafeFallbackVector() {
+        float[] fallback = new float[384];
+        // Stavi bilo šta osim nule na prvi indeks
+        fallback[0] = 0.5f;
+        return fallback;
     }
 }
