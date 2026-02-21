@@ -10,6 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DynamicSummaryDTO {
+    private String serverFilename;
     private String title;
     private String summary;
 }

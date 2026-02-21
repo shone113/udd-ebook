@@ -1,5 +1,6 @@
 package com.example.ddmdemo.controller;
 
+import com.example.ddmdemo.model.ForensicReport;
 import com.example.ddmdemo.service.interfaces.FileService;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,4 +37,5 @@ public class FileController {
             .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(Path.of(filename)))
             .body(new InputStreamResource(minioResponse));
     }
+
 }

@@ -103,7 +103,7 @@ public class ForensicSearchServiceImpl implements ForensicSearchService {
                             .orElse(truncate(doc.getMalwareDescription(), 150));
 
                     // Mapiramo na DynamicSummaryDTO (fileName kao title, isečak kao summary)
-                    return new DynamicSummaryDTO(doc.getFileName(), summary);
+                    return new DynamicSummaryDTO(doc.getServerFilename(), doc.getTitle(), summary);
                 })
                 .toList();
     }
@@ -126,6 +126,56 @@ public class ForensicSearchServiceImpl implements ForensicSearchService {
         SearchHits<ForensicReportIndex> hits = elasticsearchOperations.search(nativeQuery, ForensicReportIndex.class);
 
         System.out.println("Ovo su hits: " + hits);
+        return mapHitsToDynamicSummary(hits);
+    }
+
+    public List<DynamicSummaryDTO> searchByOrgAndMalware(String orgName, String malwareName) {
+        NativeQuery query = NativeQuery.builder()
+                .withQuery(q -> q.bool(b -> {
+                    // Ako je prosleđena organizacija, dodaj je u 'must' (AND)
+                    if (orgName != null && !orgName.isBlank()) {
+                        b.must(m -> m.match(t -> t.field("organizationName").query(orgName)));
+                    }
+                    // Ako je prosleđen naziv malvera, dodaj ga u 'must' (AND)
+                    if (malwareName != null && !malwareName.isBlank()) {
+                        b.must(m -> m.match(t -> t.field("malwareName").query(malwareName)));
+                    }
+                    return b;
+                }))
+                .build();
+
+        SearchHits<ForensicReportIndex> hits = elasticsearchOperations.search(query, ForensicReportIndex.class);
+        return mapHitsToDynamicSummary(hits);
+    }
+
+    public List<DynamicSummaryDTO> searchByMetadata(String name, String surname, String hash, String classification) {
+        NativeQuery query = NativeQuery.builder()
+                .withQuery(q -> q.bool(b -> {
+                    // Ime - Text polje (MatchPhrasePrefix omogućava pretragu po početku reči)
+                    if (name != null && !name.isBlank()) {
+                        b.must(m -> m.matchPhrasePrefix(p -> p.field("analystName").query(name)));
+                    }
+
+                    // Prezime - Text polje
+                    if (surname != null && !surname.isBlank()) {
+                        b.must(m -> m.matchPhrasePrefix(p -> p.field("analystSurname").query(surname)));
+                    }
+
+                    // Hash - Keyword polje (Mora biti tačno onako kako je upisano, koristimo term)
+                    if (hash != null && !hash.isBlank()) {
+                        b.must(m -> m.term(t -> t.field("sampleHash").value(hash)));
+                    }
+
+                    // Klasifikacija pretnje - Keyword polje (Obično su to fiksne kategorije poput "Ransomware")
+                    if (classification != null && !classification.isBlank()) {
+                        b.must(m -> m.term(t -> t.field("threatClassification").value(classification)));
+                    }
+
+                    return b;
+                }))
+                .build();
+
+        SearchHits<ForensicReportIndex> hits = elasticsearchOperations.search(query, ForensicReportIndex.class);
         return mapHitsToDynamicSummary(hits);
     }
 

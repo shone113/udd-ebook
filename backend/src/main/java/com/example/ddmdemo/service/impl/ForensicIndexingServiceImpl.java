@@ -58,6 +58,10 @@ public class ForensicIndexingServiceImpl implements ForensicIndexingService {
     // Za Organizaciju (sve posle reči Organizacija)
     private static final Pattern ORG_PATTERN = Pattern.compile("Organizacija\\s+(.*)");
 
+    private static final Pattern TITLE_PATTERN = Pattern.compile(
+            "\\+\\d[\\d\\s]+\\s*\\n+\\s*([A-Z�ŠĐŽČĆ][A-Z�ŠĐŽČĆ\\s]+)",
+            Pattern.UNICODE_CHARACTER_CLASS
+    );
     private static final Pattern ADDRESS_LINE_PATTERN = Pattern.compile(
             "(?<=Organizacija\\s+[^\\n]+\\s+)?([A-Za-zČčĆćŠšĐđŽž\\s\\.,'-]+?)\\s*,\\s*(\\d+[A-Za-z]?)\\s*,\\s*([A-Za-zČčĆćŠšĐđŽž\\s-]+)(?:\\.|\\s|$)",
             Pattern.CASE_INSENSITIVE
@@ -125,6 +129,9 @@ public class ForensicIndexingServiceImpl implements ForensicIndexingService {
         // Organizacija
         m = ORG_PATTERN.matcher(text);
         if (m.find()) index.setOrganizationName(m.group(1).trim());
+
+        m = TITLE_PATTERN.matcher(text);
+        if (m.find()) index.setTitle(m.group(1).split("\\n")[0].trim());
 
         // Klasifikacija
         m = CLASS_PATTERN.matcher(text);

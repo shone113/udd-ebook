@@ -39,6 +39,9 @@ public class ForensicReportIndex {
     @Field(type = FieldType.Text, store = true, name = "malwareName")
     private String malwareName;
 
+    @Field(type = FieldType.Text, store = true, name = "title")
+    private String title;
+
     @Field(type = FieldType.Text,
             store = true,
             name = "malwareDescription",

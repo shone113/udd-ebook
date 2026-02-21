@@ -23,6 +23,8 @@ public class EmbeddingServiceImpl implements EmbeddingService {
     @Value("${hf.api.token}")
     private String authToken;
 
+    private final String AUTH_TOKEN = "Bearer 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";
+
     public float[] getVector(String text) {
         if (text == null || text.isBlank()) return createSafeFallbackVector();
 
@@ -34,7 +36,7 @@ public class EmbeddingServiceImpl implements EmbeddingService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-            headers.set("Authorization", authToken);
+            headers.set("Authorization", AUTH_TOKEN);
 
             // Najjednostavniji mogući body
             Map<String, Object> body = Map.of("inputs", cleanText);

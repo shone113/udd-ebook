@@ -33,6 +33,13 @@ public class SearchController {
 //        return searchService.advancedSearch(advancedSearchQuery.keywords(), pageable);
 //    }
 
+    @GetMapping("/org-and-malware")
+    public List<DynamicSummaryDTO> advancedSearch(
+            @RequestParam(required = false) String organization,
+            @RequestParam(required = false) String malware) {
+        return searchService.searchByOrgAndMalware(organization, malware);
+    }
+
     @GetMapping("/full-text")
     public List<DynamicSummaryDTO> fullTextSearch(@RequestParam String query) {
         return searchService.fullTextSearch(query);
@@ -48,4 +55,14 @@ public class SearchController {
         // query može biti: "digitalna forenzika" AND NOT (viber OR whatsapp)
         return searchService.booleanSearch(query);
     }
+
+    @GetMapping("/search/reports")
+    public List<DynamicSummaryDTO> searchReports(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String surname,
+            @RequestParam(required = false) String hash,
+            @RequestParam(required = false) String classification) {
+        return searchService.searchByMetadata(name, surname, hash, classification);
+    }
+
 }
