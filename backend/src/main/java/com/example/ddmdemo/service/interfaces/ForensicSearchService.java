@@ -13,7 +13,7 @@ import java.util.List;
 @Service
 public interface ForensicSearchService {
     public List<DynamicSummaryDTO> searchByOrgAndMalware(String orgName, String malwareName);
-    public List<DynamicSummaryDTO> searchByMetadata(String name, String surname, String hash, String classification);
+    public List<DynamicSummaryDTO> searchByMetadata(String analyst, String hash, String classification);
     public List<DynamicSummaryDTO> fullTextSearch(String searchTerms);
     public List<DynamicSummaryDTO> knnSearch(String searchTerms);
     public List<DynamicSummaryDTO> booleanSearch(String queryStr);

@@ -7,11 +7,7 @@ import com.example.ddmdemo.service.interfaces.ForensicIndexingService;
 import com.example.ddmdemo.service.interfaces.IndexingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/index")
@@ -27,5 +23,15 @@ public class IndexController {
     public ForensicReportIndexDTO addDocumentFile(
         @ModelAttribute DummyDocumentFileDTO documentFile) {
         return forensicIndexingService.indexDocument(documentFile.file());
+    }
+
+    @PostMapping("/confirm")
+    @ResponseStatus(HttpStatus.OK)
+    public ForensicReportIndexDTO confirmIndexing(@RequestBody ForensicReportIndexDTO reportDTO) {
+        System.out.println("Primljen DTO: " + reportDTO);
+        System.out.println("Analysts: " + reportDTO.getAnalysts());
+        System.out.println("Organization: " + reportDTO.getOrganizationName());
+        // ... ostala polja
+        return forensicIndexingService.confirmAndSaveIndex(reportDTO);
     }
 }

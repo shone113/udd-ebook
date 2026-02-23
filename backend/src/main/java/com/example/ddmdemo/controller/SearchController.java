@@ -58,11 +58,10 @@ public class SearchController {
 
     @GetMapping("/search/reports")
     public List<DynamicSummaryDTO> searchReports(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String surname,
+            @RequestParam(required = false) String analyst,
             @RequestParam(required = false) String hash,
             @RequestParam(required = false) String classification) {
-        return searchService.searchByMetadata(name, surname, hash, classification);
+        return searchService.searchByMetadata(analyst, hash, classification);
     }
 
 }

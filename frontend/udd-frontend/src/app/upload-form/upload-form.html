@@ -1,0 +1,93 @@
+<div class="container">
+
+<div class="upload-container">
+    <div class="upload-card"
+         [class.file-selected]="selectedFile"
+         [class.success]="isUploaded">
+
+      <div class="upload-icon">
+        <i class="fas"
+           [class.fa-check-circle]="isUploaded"
+           [class.fa-file-pdf]="selectedFile && !isUploaded"
+           [class.fa-cloud-upload-alt]="!selectedFile && !isUploaded">
+        </i>
+      </div>
+
+      <div class="upload-text">
+        <span class="main-text">
+          {{ isUploaded ? 'Izveštaj uspešno obrađen' : (selectedFile ? selectedFile.name : 'Odaberite forenzički izveštaj (PDF)') }}
+        </span>
+        <span class="sub-text" *ngIf="!selectedFile && !isUploaded">
+          Drag & drop ili kliknite za pretragu
+        </span>
+      </div>
+
+      <ng-container *ngIf="!isUploaded">
+        <input type="file" (change)="onFileSelected($event)" accept=".pdf" id="fileInput">
+        <label for="fileInput" class="select-button">Pretraži</label>
+      </ng-container>
+    </div>
+
+
+         <button *ngIf="selectedFile" (click)="onUpload()" class="upload-confirm-btn">
+          Pošalji na analizu
+        </button>
+  </div>
+
+  <h2>Izveštaj o analizi malvera</h2>
+
+  <form #f="ngForm" class="report-form">
+    <div class="row">
+      <label>Forenzičari:</label>
+      <input name="analysts" [(ngModel)]="report.analysts">
+    </div>
+
+    <div class="row">
+      <label>Organizacija:</label>
+      <input name="org" [(ngModel)]="report.organizationName">
+    </div>
+
+    <div class="grid-2">
+      <div class="row">
+        <label>Naziv malvera:</label>
+        <input name="mName" [(ngModel)]="report.malwareName">
+      </div>
+      <div class="row">
+        <label>Klasifikacija:</label>
+        <input name="class" [(ngModel)]="report.threatClassification">
+      </div>
+    </div>
+
+    <div class="row">
+      <label>Opis ponašanja:</label>
+      <textarea name="desc" [(ngModel)]="report.malwareDescription" rows="5"></textarea>
+    </div>
+
+    <div class="row">
+      <label>Sample Hash:</label>
+      <input name="hash" [(ngModel)]="report.sampleHash" class="hash-input">
+    </div>
+
+    <h3>Lokacija</h3>
+    <div class="grid-3">
+      <div class="row">
+        <label>Ulica:</label>
+        <input name="road" [(ngModel)]="report.address.road">
+      </div>
+      <div class="row">
+        <label>Broj:</label>
+        <input name="hNum" [(ngModel)]="report.address.houseNumber">
+      </div>
+      <div class="row">
+        <label>Grad:</label>
+        <input name="city" [(ngModel)]="report.address.city">
+      </div>
+    </div>
+
+    <button type="button"
+            class="index-btn"
+            (click)="onIndexDocument()">
+      Indeksiraj dokument
+    </button>
+  </form>
+ </div>

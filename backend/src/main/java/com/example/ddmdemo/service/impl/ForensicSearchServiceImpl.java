@@ -148,19 +148,17 @@ public class ForensicSearchServiceImpl implements ForensicSearchService {
         return mapHitsToDynamicSummary(hits);
     }
 
-    public List<DynamicSummaryDTO> searchByMetadata(String name, String surname, String hash, String classification) {
+    public List<DynamicSummaryDTO> searchByMetadata(String analyst, String hash, String classification) {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(q -> q.bool(b -> {
-                    // Ime - Text polje (MatchPhrasePrefix omogućava pretragu po početku reči)
-                    if (name != null && !name.isBlank()) {
-                        b.must(m -> m.matchPhrasePrefix(p -> p.field("analystName").query(name)));
-                    }
 
-                    // Prezime - Text polje
-                    if (surname != null && !surname.isBlank()) {
-                        b.must(m -> m.matchPhrasePrefix(p -> p.field("analystSurname").query(surname)));
+                    if (analyst != null && !analyst.isBlank()) {
+                        // Koristimo match ili matchPhrasePrefix nad jedinstvenim poljem "analysts"
+                        b.must(m -> m.matchPhrasePrefix(p -> p
+                                .field("analysts")
+                                .query(analyst)
+                        ));
                     }
-
                     // Hash - Keyword polje (Mora biti tačno onako kako je upisano, koristimo term)
                     if (hash != null && !hash.isBlank()) {
                         b.must(m -> m.term(t -> t.field("sampleHash").value(hash)));

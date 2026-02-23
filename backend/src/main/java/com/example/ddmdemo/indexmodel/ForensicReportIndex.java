@@ -1,5 +1,6 @@
 package com.example.ddmdemo.indexmodel;
 
+import com.example.ddmdemo.dto.ForensicReportIndexDTO;
 import org.springframework.data.elasticsearch.annotations.*;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.data.annotation.Id;
@@ -9,6 +10,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.elasticsearch.annotations.Similarity;
+
+import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -27,11 +31,8 @@ public class ForensicReportIndex {
     @Field(type = FieldType.Text, store = true, name = "server_filename", index = false)
     private String serverFilename;
 
-    @Field(type = FieldType.Text, store = true, name = "analystName")
-    private String analystName;
-
-    @Field(type = FieldType.Text, store = true, name = "analystSurname")
-    private String analystSurname;
+    @Field(type = FieldType.Text, store = true, name = "analysts")
+    private List<String> analysts;
 
     @Field(type = FieldType.Text, store = true, name = "organizationName")
     private String organizationName;
@@ -70,4 +71,37 @@ public class ForensicReportIndex {
             analyzer = "serbian_analyzer",
             searchAnalyzer = "serbian_analyzer")
     private String content;
+
+    @Field(type = FieldType.Text, store = true, name = "city", analyzer = "serbian_analyzer")
+    private String city;
+
+    @Field(type = FieldType.Text, store = true, name = "road", analyzer = "serbian_analyzer")
+    private String road;
+
+    @Field(type = FieldType.Keyword, store = true, name = "houseNumber")
+    private String houseNumber;
+
+    public ForensicReportIndex fromDtoToIndex(ForensicReportIndexDTO dto) {
+        ForensicReportIndex index = new ForensicReportIndex();
+
+        // Setovanje osnovnih polja
+        index.setId(UUID.randomUUID().toString()); // Generisanje ID-a ako nije prisutan u DTO
+        index.setFileName(dto.getFileName());
+        index.setServerFilename(dto.getServerFilename());
+        index.setAnalysts(dto.getAnalysts());
+        index.setOrganizationName(dto.getOrganizationName());
+        index.setMalwareName(dto.getMalwareName());
+        index.setTitle(dto.getTitle());
+        index.setMalwareDescription(dto.getMalwareDescription());
+        index.setThreatClassification(dto.getThreatClassification());
+        index.setSampleHash(dto.getSampleHash());
+        index.setDatabaseId(dto.getDatabaseId());
+        index.setContent(dto.getContent());
+        index.setCity(dto.getCity());
+        index.setRoad(dto.getRoad());
+        index.setHouseNumber(dto.getHouseNumber());
+
+        return index;
+    }
+
 }

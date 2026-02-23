@@ -8,15 +8,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ForensicReportIndexDTO {
 
-    private String analystName;
-
-    private String analystSurname;
+    private List<String> analysts;
 
     private String organizationName;
 
@@ -28,17 +28,36 @@ public class ForensicReportIndexDTO {
 
     private String sampleHash;
 
-    private String address;
+    private String road;
 
-    private MultipartFile forensicReport;
+    private String city;
+
+    private String houseNumber;
+
+    private String fileName;
+
+    private String serverFilename;
+
+    private String title;
+
+    private Integer databaseId;
+
+    private String content;
 
     public ForensicReportIndexDTO(ForensicReportIndex forensicReportIndex) {
-        this.analystName = forensicReportIndex.getAnalystName();
-        this.analystSurname = forensicReportIndex.getAnalystSurname();
+        this.analysts = forensicReportIndex.getAnalysts();
         this.organizationName = forensicReportIndex.getOrganizationName();
         this.malwareName = forensicReportIndex.getMalwareName();
         this.malwareDescription = forensicReportIndex.getMalwareDescription();
         this.threatClassification = forensicReportIndex.getThreatClassification();
         this.sampleHash = forensicReportIndex.getSampleHash();
+        this.road = forensicReportIndex.getRoad();
+        this.city = forensicReportIndex.getCity();
+        this.houseNumber = forensicReportIndex.getHouseNumber();
+        this.fileName = forensicReportIndex.getFileName();
+        this.serverFilename = forensicReportIndex.getServerFilename();
+        this.title = forensicReportIndex.getTitle();
+        this.databaseId = forensicReportIndex.getDatabaseId();
+        this.content = forensicReportIndex.getContent();
     }
 }

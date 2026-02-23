@@ -33,6 +33,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -81,6 +83,11 @@ public class ForensicIndexingServiceImpl implements ForensicIndexingService {
             Pattern.CASE_INSENSITIVE
     );
 
+    private static final Pattern ANALYSTS_PATTERN = Pattern.compile(
+            "(?m)^\\s*([A-ZŠĐČĆŽ][a-zšđčćž]+\\s+[A-ZŠĐČĆŽ][a-zšđčćž]+(?:-[A-ZŠĐČĆŽ][a-zšđčćž]+)?(?:\\s{2,}[A-ZŠĐČĆŽ][a-zšđčćž]+\\s+[A-ZŠĐČĆŽ][a-zšđčćž]+(?:-[A-ZŠĐČĆŽ][a-zšđčćž]+)?)*)\\s*\\R\\s*_{3,}",
+            Pattern.UNICODE_CHARACTER_CLASS
+    );
+
     @Override
     @Transactional
     public ForensicReportIndexDTO indexDocument(MultipartFile documentFile) {
@@ -96,16 +103,15 @@ public class ForensicIndexingServiceImpl implements ForensicIndexingService {
         System.out.println("SADRZAJ: " + documentContent);
         newIndex.setContent(documentContent);
         parseText(documentContent, newIndex, newEntity);
-        parseAddress(documentContent, newIndex);
+        //parseAddress(documentContent, newIndex);
+
+        AddressDTO address = parseAddress(documentContent);
+        newIndex.setRoad(address.getRoad());
+        newIndex.setCity(address.getCity());
+        newIndex.setHouseNumber(address.getHouseNumber());
 
         var serverFilename = fileService.store(documentFile, UUID.randomUUID().toString());
         newIndex.setServerFilename(serverFilename);
-        newEntity.setServerFilename(serverFilename);
-
-
-
-        newEntity.setMimeType(detectMimeType(documentFile));
-        var savedEntity = forensicReportRepository.save(newEntity);
 
         try {
             float[] vector = embeddingService.getVector(documentContent);
@@ -115,10 +121,28 @@ public class ForensicIndexingServiceImpl implements ForensicIndexingService {
             // Opciono: postavi prazan niz ako ne uspe
             newIndex.setVectorizedContent(createSafeFallbackVector());
         }
-        newIndex.setDatabaseId(savedEntity.getId());
-        forensicReportIndexRepository.save(newIndex);
+//        newEntity.setServerFilename(serverFilename);
+
+//        newEntity.setMimeType(detectMimeType(documentFile));
+//
+//        var savedEntity = forensicReportRepository.save(newEntity);
 
         var forensicReportIndex = new ForensicReportIndexDTO(newIndex);
+
+        return forensicReportIndex;
+
+    }
+
+    public ForensicReportIndexDTO confirmAndSaveIndex(ForensicReportIndexDTO indexDTO) {
+
+        //newIndex.setDatabaseId(savedEntity.getId());
+        ForensicReportIndex index = new ForensicReportIndex().fromDtoToIndex(indexDTO);
+
+        System.out.println("Indexxxx: " + index);
+        processAddress(index.getRoad(), index.getHouseNumber(), index.getCity(), index);
+        forensicReportIndexRepository.save(index);
+
+        var forensicReportIndex = new ForensicReportIndexDTO(index);
 
         return forensicReportIndex;
     }
@@ -147,9 +171,25 @@ public class ForensicIndexingServiceImpl implements ForensicIndexingService {
 
         m = DESCRIPTION_PATTERN.matcher(text);
         if (m.find()) index.setMalwareDescription(m.group(1).trim());
+
+        index.setAnalysts(new ArrayList<>());
+        List<String> analystsList = new ArrayList<>();
+
+        m = ANALYSTS_PATTERN.matcher(text);
+
+        while (m.find()) {
+            String fullLine = m.group(1);
+
+            String[] names = fullLine.trim().split("\\s{2,}");
+
+            for (String name : names) {
+                analystsList.add(name.trim());
+            }
+        }
+        index.setAnalysts(analystsList);
     }
 
-    private void parseAddress(String text, ForensicReportIndex index) {
+    private AddressDTO parseAddress(String text) {
         String cleanText = text;
 
         System.out.println("--- DEBUG PARSIRANJE ADRESE ---");
@@ -172,14 +212,16 @@ public class ForensicIndexingServiceImpl implements ForensicIndexingService {
             System.out.println("GROUP 2: '" + m2.group(2) + "'"); // broj
             System.out.println("GROUP 3: '" + m2.group(3) + "'"); // grad
 
-            processAddress(m2.group(1), m2.group(2), m2.group(3), index);
-            return;
+//            processAddress(m2.group(1), m2.group(2), m2.group(3), index);
+            return new AddressDTO(m2.group(1), m2.group(2), m2.group(3));
         }
 
         // Ako ništa ne radi, ispiši deo teksta za ručnu proveru
         System.out.println("ERROR: Address regex nije našao poklapanje!");
         System.out.println("PRVIH 500 KARAKTERA: " + cleanText.substring(0, Math.min(500, cleanText.length())));
         System.out.println("-------------------------------");
+
+        return new AddressDTO();
     }
 
     private void processAddress(String street, String houseNumber, String city, ForensicReportIndex index) {
