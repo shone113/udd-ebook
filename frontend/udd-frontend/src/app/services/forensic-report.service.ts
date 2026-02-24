@@ -39,6 +39,10 @@ export class ForensicReportService {
     return this.http.get<DynamicSummary[]>(`http://localhost:8080/api/search/org-and-malware?organization=${organization}&malware=${malware}`);
   }
 
+  public searchByLocation(address: String, city: String, radius: String) : Observable<DynamicSummary[]>{
+    return this.http.get<DynamicSummary[]>(`http://localhost:8080/api/search/location?address=${address}&city=${city}&radius=${radius}`);
+  }
+
   public getFileUrl(filename: string): string {
     return `http://localhost:8080/api/files/${filename}`;
   }

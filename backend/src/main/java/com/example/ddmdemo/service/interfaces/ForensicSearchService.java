@@ -17,4 +17,5 @@ public interface ForensicSearchService {
     public List<DynamicSummaryDTO> fullTextSearch(String searchTerms);
     public List<DynamicSummaryDTO> knnSearch(String searchTerms);
     public List<DynamicSummaryDTO> booleanSearch(String queryStr);
+    public List<DynamicSummaryDTO> searchByLocation(String address, String city, Integer radius);
 }

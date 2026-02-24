@@ -257,3 +257,87 @@
 .boolean-btn:hover {
   background-color: #1765cc;
 }
+
+.no-results-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  text-align: center;
+  animation: fadeIn 0.5s ease;
+}
+
+.no-results-content {
+  max-width: 400px;
+  padding: 40px;
+  background: #ffffff;
+}
+
+.no-results-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+.no-results-content h3 {
+  color: #202124;
+  font-size: 22px;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.no-results-content p {
+  color: #70757a;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+
+.reset-search-btn {
+  background: none;
+  border: 1px solid #dadce0;
+  padding: 10px 20px;
+  border-radius: 20px;
+  color: #1a73e8;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.reset-search-btn:hover {
+  background-color: #f8f9fa;
+  border-color: #d2e3fc;
+}
+
+/* Kontejner za loader */
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px;
+}
+
+/* Spinner animacija */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #1a73e8; /* Google plava */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loader-container p {
+  color: #5f6368;
+  font-size: 14px;
+}
+

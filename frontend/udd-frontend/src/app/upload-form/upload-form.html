@@ -72,15 +72,15 @@
     <div class="grid-3">
       <div class="row">
         <label>Ulica:</label>
-        <input name="road" [(ngModel)]="report.address.road">
+        <input name="road" [(ngModel)]="report.road">
       </div>
       <div class="row">
         <label>Broj:</label>
-        <input name="hNum" [(ngModel)]="report.address.houseNumber">
+        <input name="hNum" [(ngModel)]="report.houseNumber">
       </div>
       <div class="row">
         <label>Grad:</label>
-        <input name="city" [(ngModel)]="report.address.city">
+        <input name="city" [(ngModel)]="report.city">
       </div>
     </div>
 
@@ -91,3 +91,18 @@
     </button>
   </form>
  </div>
+
+   <div class="custom-alert" [class.show]="alert.visible" [class.error]="alert.isError">
+  <div class="alert-content">
+    <div class="alert-icon">
+      <span *ngIf="!alert.isError">✔️</span>
+      <span *ngIf="alert.isError">❌</span>
+    </div>
+    <div class="alert-text">
+      <div class="alert-title">{{ alert.title }}</div>
+      <div class="alert-message">{{ alert.message }}</div>
+    </div>
+    <button class="alert-close" (click)="alert.visible = false">&times;</button>
+  </div>
+  <div class="progress-bar" *ngIf="alert.visible"></div>
+</div>

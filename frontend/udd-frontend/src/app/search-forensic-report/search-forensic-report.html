@@ -99,27 +99,31 @@
 <div class="search-filters-container" *ngIf="activeTab === 'lokacija'">
   <div class="filter-group address-field">
     <label for="address">Adresa</label>
-    <input type="text" id="address" class="custom-input" placeholder="Ulica i broj">
+    <input #address type="text" id="address" class="custom-input" placeholder="Ulica i broj">
   </div>
 
   <div class="filter-group city-field">
     <label for="city">Grad</label>
-    <input type="text" id="city" class="custom-input" placeholder="npr. Beograd">
+    <input #city type="text" id="city" class="custom-input" placeholder="npr. Beograd">
   </div>
 
   <div class="filter-group radius-field">
     <label for="radius">Radijus pretrage</label>
     <div class="input-addon-group">
-      <input type="number" id="radius" class="custom-input radius-input" placeholder="0" min="0">
+      <input #radius type="number" id="radius" class="custom-input radius-input" placeholder="0" min="0">
       <span class="addon-text">  km</span>
     </div>
   </div>
 
-  <button class="search-submit-btn location-btn">
+  <button class="search-submit-btn location-btn" (click)="locationSearch(address.value, city.value, radius.value)">
     <span class="search-icon">📍</span> Pretraži oblast
   </button>
 </div>
 
+<div class="loader-container" *ngIf="isLoading">
+  <div class="spinner"></div>
+  <p>Pretraživanje baze...</p>
+</div>
 
   <div class="results-list">
     <div class="result-item" *ngFor="let item of results">
@@ -130,4 +134,14 @@
       <p class="result-snippet" [innerHTML]="item.summary"></p>
     </div>
   </div>
+
+
+  <div class="no-results-container" *ngIf="results.length === 0">
+    <div class="no-results-content">
+      <div class="no-results-icon">📂</div>
+      <h3>Nema pronađenih rezultata</h3>
+      <p>Pokušajte sa drugačijim ključnim rečima ili proverite logičke operatore (AND, OR, NOT).</p>
+    </div>
+  </div>
+
 </div>

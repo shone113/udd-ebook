@@ -28,10 +28,19 @@ export class UploadForm {
     }
   };
 
+  alert = {
+    visible: false,
+    title: '',
+    message: '',
+    isError: false
+  };
+
   selectedFile: File | null = null;
   isUploaded = false;
 
   constructor(private forensicReportService: ForensicReportService) {}
+
+
 
   onFileSelected(event: any) {
     this.selectedFile = event.target.files[0];
@@ -56,23 +65,42 @@ export class UploadForm {
   }
 
   onIndexDocument() {
-    // Šaljemo direktno "report" objekat
-    console.log('Šaljem na indeksiranje:', this.report);
-
-    const analystsString = this.report.analysts; // "Marko Petrovic, Ivana Milosavljević"
-
     // Podeli po zarezu i očisti praznine
+    const analystsString = this.report.analysts;
     const analystsArray = analystsString.split(',').map((s: string) => s.trim());
 
     // Kreiraj novi objekat sa analysts kao nizom
     const reportToSend = {
         ...this.report,
-        analysts: analystsArray  // Sada je ["Marko Petrovic", "Ivana Milosavljević"]
+        analysts: analystsArray
     };
 
     this.forensicReportService.indexForensicReport(reportToSend).subscribe({
-      next: () => alert('Indeksirano!'),
+      next: () => {
+        this.report  = {
+          analysts: '',
+          organizationName: '',
+          malwareName: '',
+          malwareDescription: '',
+          threatClassification: '',
+          sampleHash: '',
+          road: '',
+          houseNumber: '',
+          city: '',
+          country: ''
+        }
+          this.showAlert('Uspeh!', 'Dokument je uspešno indeksiran.', false);
+      },
       error: (err) => console.error('Greška:', err)
     });
+  }
+
+  showAlert(title: string, message: string, isError: boolean = false) {
+    this.alert = { visible: true, title, message, isError };
+
+    // Automatsko zatvaranje nakon 5 sekundi
+    setTimeout(() => {
+      this.alert.visible = false;
+    }, 5000);
   }
 }

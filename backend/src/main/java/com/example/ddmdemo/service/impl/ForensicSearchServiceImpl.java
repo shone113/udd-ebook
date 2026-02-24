@@ -1,10 +1,14 @@
 package com.example.ddmdemo.service.impl;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.GeoDistanceQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.KnnQuery;
+import com.example.ddmdemo.dto.AddressDTO;
 import com.example.ddmdemo.dto.DynamicSummaryDTO;
 import com.example.ddmdemo.dto.ForensicReportIndexDTO;
 import com.example.ddmdemo.indexmodel.ForensicReportIndex;
+import com.example.ddmdemo.model.Address;
+import com.example.ddmdemo.service.interfaces.AddressService;
 import com.example.ddmdemo.service.interfaces.EmbeddingService;
 import com.example.ddmdemo.service.interfaces.ForensicSearchService;
 import com.example.ddmdemo.util.BooleanQueryParser;
@@ -21,14 +25,23 @@ import org.springframework.data.elasticsearch.core.query.highlight.HighlightPara
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 public class ForensicSearchServiceImpl implements ForensicSearchService {
 
+    private final AddressService addressService;
+
     private final ElasticsearchOperations elasticsearchOperations;
     private final EmbeddingService embeddingService;
     private final BooleanQueryParser queryParser;
+
+    private static final Pattern ADDRESS_PATTERN = Pattern.compile(
+            "^([A-Za-zČčĆćŠšĐđŽž\\s]+?)\\s+(\\d+[A-Za-z]?)$",
+            Pattern.CASE_INSENSITIVE
+    );
 
     public List<DynamicSummaryDTO> fullTextSearch(String searchTerms) {
         // 1. Definišemo parametre isticanja (tagovi i veličina isečka)
@@ -110,15 +123,12 @@ public class ForensicSearchServiceImpl implements ForensicSearchService {
 
     @Override
     public List<DynamicSummaryDTO> booleanSearch(String queryStr) {
-        // 1. Dobiješ postfiks (npr. [napad, "sql injection", AND])
         List<String> postfix = queryParser.parse(queryStr);
         System.out.println("Postfixna notacija: " + postfix);
 
-        // 2. Gradiš ES upit pomoću stack-a (metoda buildComplexQuery koju već imaš)
         Query esQuery = queryParser.buildComplexQuery(postfix);
         System.out.println("es query: " + esQuery);
 
-        // 3. Izvršiš pretragu
         NativeQuery nativeQuery = NativeQuery.builder()
                 .withQuery(esQuery)
                 .build();
@@ -174,6 +184,38 @@ public class ForensicSearchServiceImpl implements ForensicSearchService {
                 .build();
 
         SearchHits<ForensicReportIndex> hits = elasticsearchOperations.search(query, ForensicReportIndex.class);
+        return mapHitsToDynamicSummary(hits);
+    }
+
+    public List<DynamicSummaryDTO> searchByLocation(String address, String city, Integer radius){
+        String text = "Despota Stefana 7a, Devet Jugovica 16, Bulevar kraljice Natalije 88";
+        Matcher matcher = ADDRESS_PATTERN.matcher(address.trim());
+
+        String street = "", houseNumber = "";
+        if (matcher.matches()) {
+            street = matcher.group(1).trim();
+            houseNumber = matcher.group(2);
+        }
+
+        Address completeAddress = addressService.createAddress(new AddressDTO(street, houseNumber, city));
+
+        double lat = completeAddress.getLat();
+        double lon = completeAddress.getLon();
+
+        Query geoQuery = GeoDistanceQuery.of(g -> g
+                .field("location")
+                .distance(radius + "km") // npr. "5km"
+                .location(l -> l.latlon(ll -> ll.lat(lat).lon(lon)))
+        )._toQuery();
+
+        // 3. Izvršavanje pretrage
+        NativeQuery nativeQuery = NativeQuery.builder()
+                .withQuery(geoQuery)
+                .build();
+
+        SearchHits<ForensicReportIndex> hits = elasticsearchOperations.search(nativeQuery, ForensicReportIndex.class);
+
+        // 4. Mapiranje rezultata (koristiš svoju postojeću metodu)
         return mapHitsToDynamicSummary(hits);
     }
 

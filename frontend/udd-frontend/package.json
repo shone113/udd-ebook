@@ -30,7 +30,10 @@
     "@angular/material": "^20.2.14",
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
+    "@ng-icons/core": "^31.4.0",
+    "@ng-icons/material-icons": "^31.4.0",
     "jwt-decode": "^4.0.0",
+    "ngx-popify": "^0.1.1-beta",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"

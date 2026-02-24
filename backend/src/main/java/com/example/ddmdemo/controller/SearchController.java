@@ -64,4 +64,12 @@ public class SearchController {
         return searchService.searchByMetadata(analyst, hash, classification);
     }
 
+    @GetMapping("/location")
+    public List<DynamicSummaryDTO> searchByLocation(
+            @RequestParam(required = false) String address,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) Integer radius) {
+        return searchService.searchByLocation(address, city, radius);
+    }
+
 }

@@ -239,3 +239,82 @@ h3 {
 .address-section {
   padding-bottom: 20px;
 }
+.error-snackbar, .success-snackbar {
+  text-align: center;
+  justify-content: center;
+  min-width: 300px; /* Da ne bude preusko na sredini */
+}
+
+.custom-alert {
+  position: fixed;
+  top: -100px; /* Sakriveno iznad */
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 350px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+  z-index: 9999;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  border: 1px solid #eee;
+}
+
+.custom-alert.show {
+  top: 30px; /* Pozicija kad se pojavi */
+}
+
+.alert-content {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  gap: 15px;
+}
+
+.alert-icon {
+  font-size: 24px;
+}
+
+.alert-text {
+  flex-grow: 1;
+}
+
+.alert-title {
+  font-weight: 700;
+  font-size: 16px;
+  color: #1a73e8;
+}
+
+.custom-alert.error .alert-title {
+  color: #d32f2f;
+}
+
+.alert-message {
+  font-size: 14px;
+  color: #5f6368;
+}
+
+.alert-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #bdc1c6;
+}
+
+/* Progress bar koji se troši */
+.progress-bar {
+  height: 4px;
+  background: #1a73e8;
+  width: 100%;
+  animation: shrink 5s linear forwards;
+}
+
+.custom-alert.error .progress-bar {
+  background: #d32f2f;
+}
+
+@keyframes shrink {
+  from { width: 100%; }
+  to { width: 0%; }
+}
