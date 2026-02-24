@@ -32,9 +32,11 @@ public class FileController {
 
         var minioResponse = fileService.loadAsResource(filename);
         return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION,
-                minioResponse.headers().get("Content-Disposition"))
-            .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(Path.of(filename)))
+//            .header(HttpHeaders.CONTENT_DISPOSITION,
+//                minioResponse.headers().get("Content-Disposition"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                .header("X-Frame-Options", "ALLOWALL") // Dodaj ovo
+                .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(Path.of(filename)))
             .body(new InputStreamResource(minioResponse));
     }
 

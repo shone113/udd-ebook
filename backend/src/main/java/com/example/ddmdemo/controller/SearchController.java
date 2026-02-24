@@ -56,7 +56,7 @@ public class SearchController {
         return searchService.booleanSearch(query);
     }
 
-    @GetMapping("/search/reports")
+    @GetMapping("/general-data")
     public List<DynamicSummaryDTO> searchReports(
             @RequestParam(required = false) String analyst,
             @RequestParam(required = false) String hash,

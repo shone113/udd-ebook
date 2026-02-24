@@ -1,0 +1,16 @@
+<div class="pdf-viewer-container" style="height: 100vh; width: 100%;">
+  <iframe
+    *ngIf="safeUrl"
+    [src]="safeUrl"
+    width="100%"
+    height="100%"
+    style="border: none;"
+    allow="fullscreen">
+  </iframe>
+<!--
+  <div style="position: fixed; bottom: 20px; right: 20px;">
+    <button (click)="downloadFile()" class="btn btn-primary">
+      Preuzmi fajl
+    </button>
+  </div> -->
+</div>

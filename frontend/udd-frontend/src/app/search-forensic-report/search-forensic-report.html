@@ -1,0 +1,133 @@
+<div class="search-page-wrapper">
+  <div class="custom-tab-bar">
+    <button class="tab-btn" [class.active]="activeTab === 'opsta'" (click)="activeTab = 'opsta'">Opšta</button>
+    <button class="tab-btn" [class.active]="activeTab === 'organization'" (click)="activeTab = 'organization'">Organizacija</button>
+    <button class="tab-btn" [class.active]="activeTab === 'knnSearch'" (click)="activeTab = 'knnSearch'">Full-text</button>
+    <button class="tab-btn" [class.active]="activeTab === 'boolean'" (click)="activeTab = 'boolean'">Boolean</button>
+    <button class="tab-btn" [class.active]="activeTab === 'lokacija'" (click)="activeTab = 'lokacija'">Lokacija</button>
+  </div>
+
+  <div class="tab-info-area">
+    <p *ngIf="activeTab === 'meta'">Pretraga dubokih metapodataka fajlova.</p>
+  </div>
+
+  <div class="search-filters-container" *ngIf="activeTab === 'opsta'">
+  <div class="filter-group">
+    <label for="analyst">Forenzičar (Ime i prezime)</label>
+    <input #analyst type="text" id="analyst" class="custom-input" placeholder="npr. Marko Marković">
+  </div>
+
+  <div class="filter-group">
+    <label for="hash">Heš vrednost (Hash)</label>
+    <input #hash type="text" id="hash" class="custom-input" placeholder="SHA-256 / MD5">
+  </div>
+
+   <div class="filter-group">
+    <label for="hash">Klasifikacija</label>
+    <input #classification type="text" id="classification" class="custom-input" placeholder="Trojan Downloader">
+  </div>
+
+  <button class="search-submit-btn" (click)="generalDataSearch(analyst.value, hash.value, classification.value)">
+    <span class="search-icon">🔍</span> Pretraži
+  </button>
+</div>
+
+
+<div class="search-filters-container" *ngIf="activeTab === 'organization'">
+  <div class="filter-group">
+    <label for="organization">Organizacija</label>
+    <input #organizationInput type="text" id="organization" class="custom-input" placeholder="npr. Ministarstvo unutrašnjih poslova">
+  </div>
+
+  <div class="filter-group">
+    <label for="malware">Naziv Malware-a</label>
+    <input #malwareInput type="text" id="malware" class="custom-input" placeholder="npr. Pegasus, WannaCry...">
+  </div>
+
+  <button class="search-submit-btn"  (click)="organizationSearch(organizationInput.value, malwareInput.value)">
+    <span class="search-icon">🔍</span> Pretraži
+  </button>
+</div>
+
+
+<div class="search-filters-container" *ngIf="activeTab === 'knnSearch'">
+  <div class="filter-group full-width">
+    <label for="knnSearch">Approximate KNN (Free Text Pretraga)</label>
+    <div class="search-input-wrapper">
+      <input
+        #knnInput
+        type="text"
+        id="knnSearch"
+        class="custom-input knn-input"
+        placeholder="Opišite šta tražite (npr. 'izveštaji o napadima na baze podataka u martu')...">
+      <button class="search-submit-btn"  (click)="fullTextSearch(knnInput.value)">
+        <span class="search-icon">🔍</span> KNN Pretraga
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<div class="search-filters-container" *ngIf="activeTab === 'boolean'">
+  <div class="filter-group full-width">
+    <label for="booleanSearch">Boolean pretraga (Logički operatori)</label>
+    <div class="search-input-wrapper">
+      <div class="input-with-icon">
+        <span class="logic-icon">fx</span>
+        <input
+          #booleanInput
+          type="text"
+          id="booleanSearch"
+          class="custom-input boolean-input"
+          placeholder='npr. phishing AND "MUP" NOT "arhivirano"'>
+      </div>
+      <button class="search-submit-btn boolean-btn" (click)="booleanSearch(booleanInput.value)">
+        <span class="search-icon">🔍</span> Boolean Search
+      </button>
+    </div>
+    <div class="boolean-hints">
+      <span class="hint-badge">AND</span>
+      <span class="hint-badge">OR</span>
+      <span class="hint-badge">NOT</span>
+      <span class="hint-badge">"phrase"</span>
+      <small> Koristite operatore za preciznije filtriranje rezultata.</small>
+    </div>
+  </div>
+</div>
+
+
+<div class="search-filters-container" *ngIf="activeTab === 'lokacija'">
+  <div class="filter-group address-field">
+    <label for="address">Adresa</label>
+    <input type="text" id="address" class="custom-input" placeholder="Ulica i broj">
+  </div>
+
+  <div class="filter-group city-field">
+    <label for="city">Grad</label>
+    <input type="text" id="city" class="custom-input" placeholder="npr. Beograd">
+  </div>
+
+  <div class="filter-group radius-field">
+    <label for="radius">Radijus pretrage</label>
+    <div class="input-addon-group">
+      <input type="number" id="radius" class="custom-input radius-input" placeholder="0" min="0">
+      <span class="addon-text">  km</span>
+    </div>
+  </div>
+
+  <button class="search-submit-btn location-btn">
+    <span class="search-icon">📍</span> Pretraži oblast
+  </button>
+</div>
+
+
+  <div class="results-list">
+    <div class="result-item" *ngFor="let item of results">
+      <div class="result-meta">{{ item.serverFilename }}</div>
+      <a [routerLink]="['/preview-report', item.serverFilename]" class="result-link">
+        {{ item.title }}
+      </a>
+      <p class="result-snippet" [innerHTML]="item.summary"></p>
+    </div>
+  </div>
+</div>
