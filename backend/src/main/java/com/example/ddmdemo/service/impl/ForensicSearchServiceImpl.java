@@ -88,9 +88,9 @@ public class ForensicSearchServiceImpl implements ForensicSearchService {
 
         NativeQuery query = NativeQuery.builder()
                 .withKnnQuery(knnQuery)
+                .withMaxResults(5)
+                .withSearchType(null)
                 .build();
-
-        query.setSearchType(null);
 
         SearchHits<ForensicReportIndex> hits = elasticsearchOperations.search(query, ForensicReportIndex.class);
 
@@ -142,11 +142,10 @@ public class ForensicSearchServiceImpl implements ForensicSearchService {
     public List<DynamicSummaryDTO> searchByOrgAndMalware(String orgName, String malwareName) {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(q -> q.bool(b -> {
-                    // Ako je prosleđena organizacija, dodaj je u 'must' (AND)
                     if (orgName != null && !orgName.isBlank()) {
                         b.must(m -> m.match(t -> t.field("organizationName").query(orgName)));
                     }
-                    // Ako je prosleđen naziv malvera, dodaj ga u 'must' (AND)
+
                     if (malwareName != null && !malwareName.isBlank()) {
                         b.must(m -> m.match(t -> t.field("malwareName").query(malwareName)));
                     }
@@ -163,18 +162,15 @@ public class ForensicSearchServiceImpl implements ForensicSearchService {
                 .withQuery(q -> q.bool(b -> {
 
                     if (analyst != null && !analyst.isBlank()) {
-                        // Koristimo match ili matchPhrasePrefix nad jedinstvenim poljem "analysts"
                         b.must(m -> m.matchPhrasePrefix(p -> p
                                 .field("analysts")
                                 .query(analyst)
                         ));
                     }
-                    // Hash - Keyword polje (Mora biti tačno onako kako je upisano, koristimo term)
                     if (hash != null && !hash.isBlank()) {
                         b.must(m -> m.term(t -> t.field("sampleHash").value(hash)));
                     }
 
-                    // Klasifikacija pretnje - Keyword polje (Obično su to fiksne kategorije poput "Ransomware")
                     if (classification != null && !classification.isBlank()) {
                         b.must(m -> m.term(t -> t.field("threatClassification").value(classification)));
                     }

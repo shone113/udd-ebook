@@ -26,7 +26,6 @@ public class EmbeddingServiceImpl implements EmbeddingService {
     public float[] getVector(String text) {
         if (text == null || text.isBlank()) return createSafeFallbackVector();
 
-        // Skrati tekst na razumnu meru (npr. 500 karaktera) jer HF ima limite
         String cleanText = text.length() > 500 ? text.substring(0, 500) : text;
 
         try {
@@ -36,11 +35,9 @@ public class EmbeddingServiceImpl implements EmbeddingService {
             headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
             headers.set("Authorization", authToken);
 
-            // Najjednostavniji mogući body
             Map<String, Object> body = Map.of("inputs", cleanText);
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
-            // Pozivamo kao Object.class da vidimo šta nam stvarno vraća
             ResponseEntity<Object> responseEntity = rt.exchange(
                     API_URL,
                     HttpMethod.POST,
@@ -50,7 +47,6 @@ public class EmbeddingServiceImpl implements EmbeddingService {
 
             Object response = responseEntity.getBody();
 
-            // Ako vrati listu (što je standard za ovaj model)
             if (response instanceof List<?> list) {
                 // Ako je matrica (List of Lists)
                 if (!list.isEmpty() && list.get(0) instanceof List<?> firstRow) {
@@ -70,7 +66,6 @@ public class EmbeddingServiceImpl implements EmbeddingService {
                 }
             }
         } catch (Exception e) {
-            // Ovde ćeš sada u konzoli videti detaljnije šta nije valjalo
             System.err.println("HF API ERROR DETAILED: " + e.getMessage());
         }
         return createSafeFallbackVector();
@@ -78,7 +73,6 @@ public class EmbeddingServiceImpl implements EmbeddingService {
 
     private float[] createSafeFallbackVector() {
         float[] fallback = new float[384];
-        // Stavi bilo šta osim nule na prvi indeks
         fallback[0] = 0.5f;
         return fallback;
     }

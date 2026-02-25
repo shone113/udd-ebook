@@ -31,10 +31,10 @@ public class ForensicReportIndex {
     @Field(type = FieldType.Text, store = true, name = "server_filename", index = false)
     private String serverFilename;
 
-    @Field(type = FieldType.Text, store = true, name = "analysts")
+    @Field(type = FieldType.Text, store = true, name = "analysts", analyzer = "entity_analyzer")
     private List<String> analysts;
 
-    @Field(type = FieldType.Text, store = true, name = "organizationName")
+    @Field(type = FieldType.Text, store = true, name = "organizationName", analyzer = "entity_analyzer")
     private String organizationName;
 
     @Field(type = FieldType.Text, store = true, name = "malwareName")
@@ -72,10 +72,10 @@ public class ForensicReportIndex {
             searchAnalyzer = "serbian_analyzer")
     private String content;
 
-    @Field(type = FieldType.Text, store = true, name = "city", analyzer = "serbian_analyzer")
+    @Field(type = FieldType.Text, store = true, name = "city", analyzer = "entity_analyzer")
     private String city;
 
-    @Field(type = FieldType.Text, store = true, name = "road", analyzer = "serbian_analyzer")
+    @Field(type = FieldType.Text, store = true, name = "road", analyzer = "entity_analyzer")
     private String road;
 
     @Field(type = FieldType.Keyword, store = true, name = "houseNumber")

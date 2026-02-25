@@ -26,6 +26,8 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.tika.Tika;
 import org.apache.tika.language.detect.LanguageDetector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,6 +58,8 @@ public class ForensicIndexingServiceImpl implements ForensicIndexingService {
     private final AddressService addressService;
 
     private final EmbeddingService embeddingService;
+
+    private static final Logger logger = LoggerFactory.getLogger(ForensicIndexingServiceImpl.class);
 
     // Za Organizaciju (sve posle reči Organizacija)
     private static final Pattern ORG_PATTERN = Pattern.compile("Organizacija\\s+(.*)");
@@ -128,6 +132,16 @@ public class ForensicIndexingServiceImpl implements ForensicIndexingService {
 //        var savedEntity = forensicReportRepository.save(newEntity);
 
         var forensicReportIndex = new ForensicReportIndexDTO(newIndex);
+
+        for (String analyst : forensicReportIndex.getAnalysts()) {
+            logger.info("REPORT_INDEXED SUCCESS organization={} city={} analyst={} malware={} classification={}",
+                    forensicReportIndex.getOrganizationName().replaceAll("[\\n\\r\\t]+", " "),
+                    forensicReportIndex.getCity().replaceAll("[\\n\\r\\t]+", " "),
+                    analyst.replaceAll("[\\n\\r\\t]+", " "),
+                    forensicReportIndex.getMalwareName().replaceAll("[\\n\\r\\t]+", " "),
+                    forensicReportIndex.getThreatClassification().replaceAll("[\\n\\r\\t]+", " ")
+            );
+        }
 
         return forensicReportIndex;
 

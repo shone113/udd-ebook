@@ -67,7 +67,6 @@ public class BooleanQueryParser {
             if (isOperator(token)) {
                 if (token.equalsIgnoreCase("NOT")) {
                     Query q = stack.pop();
-                    // Koristimo Query.of(...) što je najsigurniji način
                     stack.push(Query.of(qBuilder -> qBuilder.bool(b -> b.mustNot(q))));
                 } else {
                     Query right = stack.pop();
