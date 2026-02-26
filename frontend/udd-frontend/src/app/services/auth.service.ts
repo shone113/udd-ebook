@@ -17,20 +17,16 @@ export class AuthService {
     this.refreshToken();
   }
 
-  // public login(loginDetails: LoginDetails) : Observable<string> {
-  //   return this.http.post(`${enivironment.backenUrl}/merchant/login`, loginDetails, {responseType: 'text'});
-  // }
-
-  // public verifyCode(verificationCode: VerificationCode) : Observable<string> {
-  //   return this.http.post(`${enivironment.backenUrl}/merchant/verify-mfa`, verificationCode, {responseType: 'text'});
-  // }
+  public login(loginDetails: LoginDetails) : Observable<string> {
+    return this.http.post(`http://localhost:8080/users/login`, loginDetails, {responseType: 'text'});
+  }
 
   public getToken() : string {
-    return localStorage.getItem("psp_token") || "";
+    return localStorage.getItem("udd_token") || "";
   }
 
     getDecodedToken(): JwtPayload | null {
-    const token = localStorage.getItem('psp_token');
+    const token = localStorage.getItem('udd_token');
     if (!token) return null;
 
     try {
@@ -73,7 +69,7 @@ export class AuthService {
   }
 
   public logout() {
-    localStorage.removeItem("psp_token");
+    localStorage.removeItem("udd_token");
     this.refreshToken();
   }
 

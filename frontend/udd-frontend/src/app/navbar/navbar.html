@@ -1,0 +1,20 @@
+<nav class="navbar">
+  <div class="nav-logo">UDD - Forensic reports</div>
+
+  <div class="nav-links">
+    <a *ngIf="!isLoggedIn"
+       routerLink="/login"
+       routerLinkActive="active">
+       Login
+    </a>
+
+    <ng-container *ngIf="isLoggedIn">
+
+      <a routerLink="/upload-form" class="nav-link">Indeksiraj dokument</a>
+      <span ><a routerLink="/search-reports" class="nav-link">Pretrazi izvestaje</a></span>
+      <span ><a routerLink="/statistics" class="nav-link">Statistika</a></span>
+      <span class="user-email">{{ authService.getEmail() }}</span>
+      <a (click)="onLogout()" class="logout-link">Logout</a>
+    </ng-container>
+  </div>
+</nav>

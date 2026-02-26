@@ -128,7 +128,8 @@
   <div class="results-list">
     <div class="result-item" *ngFor="let item of results">
       <div class="result-meta">{{ item.serverFilename }}</div>
-      <a [routerLink]="['/preview-report', item.serverFilename]" class="result-link">
+      <a [routerLink]="['/preview-report', item.serverFilename]"
+          class="result-link">
         {{ item.title }}
       </a>
       <p class="result-snippet" [innerHTML]="item.summary"></p>

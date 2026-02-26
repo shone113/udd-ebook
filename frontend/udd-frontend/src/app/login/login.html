@@ -1,0 +1,37 @@
+<div class="login-wrapper">
+
+  <form #loginForm="ngForm" (ngSubmit)="onSubmit()">
+
+    <div class="field">
+      <label>Email:</label>
+      <input
+        type="email"
+        name="email"
+        [(ngModel)]="loginData.email"
+        required
+        email
+        #emailRef="ngModel">
+
+      <small class="error" *ngIf="emailRef.invalid && emailRef.touched">
+        Unesite validan email.
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Lozinka:</label>
+      <input
+        type="password"
+        name="password"
+        [(ngModel)]="loginData.password"
+        required
+        minlength="6"
+        #passRef="ngModel">
+
+      <small class="error" *ngIf="passRef.invalid && passRef.touched">
+        Lozinka mora imati bar 6 karaktera.
+      </small>
+    </div>
+
+    <button type="submit" >Uloguj se</button>
+  </form>
+</div>

@@ -31,7 +31,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                 )
                 .authorizeHttpRequests(auth -> auth
 //                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-//                        .requestMatchers("/merchant/login").permitAll()
+                        .requestMatchers("/users/login").permitAll()
 //                        .anyRequest().authenticated()
                         .anyRequest().permitAll()
                 )
